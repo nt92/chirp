@@ -1,14 +1,22 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-    <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <div id = "weather">
-
+  <head>
+    <title>Chirp</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+    <script src="js/chirpApp.js"></script>
+  </head>
+  <body ng-app = "chirpApp">
+    <div id='main'>
+      <form>
+        <input type="text" placeholder="Your name" />
+        <textarea required maxlength="200" rows="3" placeholder="Say something"></textarea>
+        <input class="button" type="submit" value="Chirp!" />
+      </form>
+      <div id="post-stream">
+        <h4>Chirp Feed</h4>
+              <!--to be populated by Angular-->
         </div>
-        <script src="weather.js" type="text/javascript"></script>
-    </body>
+      </div>
+    </div>
+  </body>
 </html>

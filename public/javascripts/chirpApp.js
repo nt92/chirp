@@ -1,4 +1,13 @@
-var app = angular.module('chirpApp', ['ngRoute']);
+var app = angular.module('chirpApp', ['ngRoute']).run(function($http, $rootScope) {
+	$rootScope.authenticated = false;
+	$rootScope.current_user = 'Guest';
+
+  $rootScope.signout = function(){
+		$http.get('auth/signout');
+		$rootScope.authenticated = false;
+		$rootScope.current_user = 'Guest';
+	};
+});
 
 app.config(function($routeProvider){
   $routeProvider
@@ -32,21 +41,33 @@ app.controller('mainController', function($scope){
 });
 
 //authcontroller allows for login and register to use the same controller
-app.controller('authController', function($scope){
+app.controller('authController', function($scope, $rootScope, $http, $location){
   $scope.user = {username: '', password: ''};
   $scope.error_message = '';
 
-  postService.getAll().success(function(data){
-    $scope.posts = data;
-  });
-
   $scope.login = function(){
-    //placeholder until authentication is implemented
-    $scope.error_message = 'login request for ' + $scope.user.username;
-  };
+		$http.post('/auth/login', $scope.user).success(function(data){
+			if(data.state == 'success'){
+				$rootScope.authenticated = true;
+				$rootScope.current_user = data.user.username;
+				$location.path('/');
+			}
+			else{
+				$scope.error_message = data.message;
+			}
+		});
+	};
 
-  $scope.register = function(){
-    //placeholder until authentication is implemented
-    $scope.error_message = 'registeration request for ' + $scope.user.username;
-  };
+	$scope.register = function(){
+		$http.post('/auth/signup', $scope.user).success(function(data){
+			if(data.state == 'success'){
+				$rootScope.authenticated = true;
+				$rootScope.current_user = data.user.username;
+				$location.path('/');
+			}
+			else{
+				$scope.error_message = data.message;
+			}
+		});
+	};
 });

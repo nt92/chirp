@@ -1,4 +1,4 @@
-var app = angular.module('chirpApp', ['ngRoute']).run(function($http, $rootScope) {
+var app = angular.module('chirpApp', ['ngRoute', 'ngResource']).run(function($http, $rootScope) {
 	$rootScope.authenticated = false;
 	$rootScope.current_user = 'Guest';
 
@@ -28,29 +28,28 @@ app.config(function($routeProvider){
     });
 });
 
-app.factory('postService', function($http){
-  var baseUrl = "/api/posts";
-  var factory = {};
-  factory.getAll = function(){
-    return $http.get(baseUrl);
-  };
-  return factory;
+app.factory('postService', function($resource){
+  return $resource('/api/posts/:id');
 });
 
 //maincontroller is the put into the html where it modifies the code
-app.controller('mainController', function($scope, postService){
-  $scope.posts = [];
+app.controller('mainController', function($scope, $rootScope, postService){
+	$scope.posts = postService.query();
   $scope.newPost = {created_by: '', text: '', created_at: ''};
 
-  postService.getAll().success(function(data){
-		$scope.posts = data;
-	});
+	$scope.post = function() {
+	  $scope.newPost.created_by = $rootScope.current_user;
+	  $scope.newPost.created_at = Date.now();
+	  postService.save($scope.newPost, function(){
+	    $scope.posts = postService.query();
+	    $scope.newPost = {created_by: '', text: '', created_at: ''};
+	  });
+	};
 
-  $scope.post = function(){
-    $scope.newPost.created_at = Date.now();
-    $scope.posts.push($scope.newPost);
-    $scope.newPost = {created_by: '', text: '', created_at: ''};
-  }
+	$scope.delete = function(post)	{
+		postService.delete({id: post._id});
+		$scope.posts = postService.query();
+	};
 });
 
 //authcontroller allows for login and register to use the same controller
